@@ -9,6 +9,7 @@ export default function Landing() {
   const [mode, setMode] = useState(null) // 'create' or 'join'
   const [error, setError] = useState('')
 
+
   const handleCreate = () => {
     if (!username.trim()) return setError('Enter your name first')
     const roomId = uuidv4().slice(0, 8).toUpperCase()
@@ -16,25 +17,28 @@ export default function Landing() {
     navigate(`/base/${roomId}`)
   }
 
+
+
   const handleJoin = () => {
     if (!username.trim()) return setError('Enter your name first')
     if (!roomInput.trim()) return setError('Enter a room code')
-    localStorage.setItem('vortex_user', username.trim())
+    // localStorage.setItem('vortex_user', username.trim())
     navigate(`/base/${roomInput.trim().toUpperCase()}`)
   }
+
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white flex flex-col items-center justify-center relative overflow-hidden">
 
       {/* Animated background orbs */}
-      <div className="absolute w-[500px] h-[500px] bg-purple-700 opacity-10 rounded-full blur-3xl top-[-100px] left-[-100px] animate-pulse" />
-      <div className="absolute w-[400px] h-[400px] bg-cyan-500 opacity-10 rounded-full blur-3xl bottom-[-100px] right-[-100px] animate-pulse" />
-      <div className="absolute w-[300px] h-[300px] bg-violet-600 opacity-5 rounded-full blur-2xl top-[40%] left-[40%] animate-pulse" />
+      <div className="absolute w-[300px] h-[500px] bg-purple-700  rounded-full  top-[-100px] left-[-100px] " />
+      <div className="absolute w-[300px] h-[400px] bg-cyan-500  rounded-full  bottom-[-100px] right-[-100px] " />
+      <div className="absolute w-[00px] h-[300px] bg-violet-600  rounded-full  top-[40%] left-[40%] " />
 
       {/* Logo */}
       <div className="relative z-10 flex flex-col items-center mb-12">
-        <div className="text-7xl mb-4 drop-shadow-[0_0_30px_rgba(139,92,246,0.8)]">🌀</div>
-        <h1 className="text-6xl font-black tracking-widest bg-gradient-to-r from-violet-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
+        <div className="text-7xl mb-4 ">🌀</div>
+        <h1 className="text-6xl font-black tracking-widest text-white bg-clip-text text-transparent">
           VORTEX
         </h1>
         <p className="text-gray-400 mt-3 tracking-widest text-sm uppercase">
@@ -62,9 +66,9 @@ export default function Landing() {
           <div className="flex gap-4">
             <button
               onClick={() => setMode('create')}
-              className="flex-1 bg-violet-600 hover:bg-violet-500 transition rounded-xl py-3 font-bold tracking-wider text-sm uppercase shadow-lg shadow-violet-900"
+              className="flex-1 bg-violet-600  transition rounded-xl py-3 font-bold tracking-wider text-sm uppercase  shadow-violet-900"
             >
-              ✦ Create Wormhole
+              Create Wormhole
             </button>
             <button
               onClick={() => setMode('join')}

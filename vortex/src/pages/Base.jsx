@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
 import { useParams, useNavigate } from 'react-router-dom'
 import TopBar from '../components/layout/TopBar'
 import Sidebar from '../components/layout/Sidebar'
@@ -6,9 +7,9 @@ import VideoPlayer from '../components/player/VideoPlayer'
 import FileTransfer from '../components/transfer/FileTransfer'
 import SharedNotepad from '../components/shared/SharedNotepad'
 import SharedClipboard from '../components/shared/SharedClipboard'
-import WormholePortal from '../components/wormhole/WormholePortal'
 import RoomCode from '../components/wormhole/RoomCode'
 import ConnectionStatus from '../components/wormhole/ConnectionStatus'
+import socket from '../lib/socket'
 
 export default function Base() {
   const { roomId } = useParams()
@@ -24,10 +25,48 @@ export default function Base() {
     setIsLeader(false)
   }
 
+
   const simulateFriendJoin = () => {
     setConnected(true)
     setFriendName('Shadow')
   }
+
+
+  useEffect(()=>{
+
+    socket.emit('join-room',{roomId,username});
+    socket.on('room-full',()=>{
+      navigate('/');
+    })
+     
+    socket.on('friend-left', ({ name }) => {
+    setConnected(false)
+    setFriendName('')
+})
+
+    socket.on('friend-joined',({name})=>{
+      console.log("at frontend",name,"has been joined");
+      setConnected(true);
+      setFriendName(name);
+      setIsLeader(true);
+    })
+
+    
+      socket.on('you-are-leader', () => setIsLeader(true))
+      socket.on('you-are-member', () => setIsLeader(false))
+
+
+    return () => {
+        socket.off('friend-joined')
+        socket.off('friend-left')
+        socket.off('room-full')
+        socket.off('you-are-leader')
+        socket.off('you-are-member')
+    }
+
+  },[])
+
+
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white flex flex-col overflow-hidden">
@@ -58,7 +97,6 @@ export default function Base() {
           {/* Waiting overlay */}
           {!connected && (
             <div className="absolute inset-0 z-30 bg-[#0a0a0f]/95 backdrop-blur flex flex-col items-center justify-center gap-8">
-              {/* <WormholePortal connected={connected} /> */}
               <ConnectionStatus
                 connected={connected}
                 friendName={friendName}
@@ -70,9 +108,11 @@ export default function Base() {
                 className="text-xs text-gray-700 hover:text-gray-400 transition uppercase tracking-widest border border-white/5 px-4 py-2 rounded-xl"
               >
                 [Dev] Simulate friend joining →
+
               </button>
             </div>
           )}
+
 
           {/* Panels */}
           {activePanel === 'player'    && <VideoPlayer />}

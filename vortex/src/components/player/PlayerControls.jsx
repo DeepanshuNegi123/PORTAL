@@ -11,7 +11,7 @@ export default function PlayerControls({
   playing, currentTime, duration, volume, muted,
   onTogglePlay, onSeek, onVolume, onMute,
   onSkipForward, onSkipBackward, onFullscreen,
-  onNext, onPrev, ghostlines, onToggleGhostlines,
+  onNext, onPrev,
   hasNext, hasPrev
 }) {
   const progress = duration ? (currentTime / duration) * 100 : 0
@@ -91,17 +91,6 @@ export default function PlayerControls({
         {/* Right controls */}
         <div className="flex items-center gap-3">
 
-          {/* Ghostlines toggle */}
-          <button
-            onClick={onToggleGhostlines}
-            className={`text-xs uppercase tracking-widest px-3 py-1 rounded-lg border transition ${
-              ghostlines
-                ? 'border-violet-500 text-violet-400 bg-violet-500/10'
-                : 'border-white/10 text-gray-600 hover:text-gray-400'
-            }`}
-          >
-            ✏ Ghostlines
-          </button>
 
           {/* Volume */}
           <div className="flex items-center gap-2">

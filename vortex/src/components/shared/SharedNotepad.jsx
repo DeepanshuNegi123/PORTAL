@@ -219,7 +219,7 @@ export default function SharedNotepad() {
             onChange={(e) => setText(e.target.value)}
             placeholder={`Start typing...\n\nThis notepad is shared with your friend in real time.\nUse # for headings, - for lists, > for quotes.\n\nTip: Press the ⏱ button to insert a timestamp.`}
             className={`
-              flex-1 w-full resize-none bg-transparent text-gray-200
+              flex-1 w-full bg-inherit resize-none  text-gray-200
               placeholder-gray-700 outline-none px-8 py-6 leading-relaxed
               font-roman ${fontSizeClass}
               ${wordWrap ? 'whitespace-pre-wrap' : 'whitespace-pre overflow-x-auto'}

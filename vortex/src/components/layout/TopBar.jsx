@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function TopBar({ roomId, username, onLeave }) {
+export default function TopBar({ roomId, username, onLeave , friendName, isLeader ,connected}) {
   const [copied, setCopied] = useState(false)
 
   const copyCode = () => {
@@ -14,8 +14,8 @@ export default function TopBar({ roomId, username, onLeave }) {
 
       {/* Left — Logo */}
       <div className="flex items-center gap-3">
-        <span className="text-2xl drop-shadow-[0_0_10px_rgba(139,92,246,0.8)]">🌀</span>
-        <span className="font-black tracking-widest text-lg bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
+        <span className="text-2xl">🌀</span>
+        <span className="font-black tracking-widest text-lg text-white">
           VORTEX
         </span>
       </div>
@@ -36,16 +36,29 @@ export default function TopBar({ roomId, username, onLeave }) {
       <div className="flex items-center gap-4">
 
         {/* Connection status */}
-        <div className="flex items-center gap-2">
+     { !connected&&  <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
           <span className="text-xs text-gray-400">Waiting for friend...</span>
         </div>
+}
+{/* if connection is successful */}
+
+{connected && <div className='flex items-center gap-2'>
+<div className='w-2 h-2 rounded-full bg-green-400 animate-pulse'>
+</div>
+<span className='text-xs text-gray-400'>{`${friendName} is online`}</span>
+</div>
+}
+
+
+
 
         {/* Username */}
         <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5">
           <span className="text-yellow-400 text-sm">👑</span>
           <span className="text-sm font-medium text-gray-200">{username}</span>
         </div>
+
 
         {/* Leave */}
         <button

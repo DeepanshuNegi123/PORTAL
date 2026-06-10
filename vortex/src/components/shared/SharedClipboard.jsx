@@ -10,11 +10,15 @@ export default function SharedClipboard() {
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef(null)
 
+  
+
   const detectType = (text) => {
     if (/^https?:\/\//.test(text.trim())) return 'link'
     if (/^[\s\S]*[{}\[\]();][\s\S]*$/.test(text) && text.includes('\n')) return 'code'
     return 'text'
   }
+
+
 
   const addItem = (content, type = null, imageUrl = null) => {
     const item = {

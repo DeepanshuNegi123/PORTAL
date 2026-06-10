@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import PlayerControls from './PlayerControls'
 import FileDropZone from './FileDropZone'
 import Playlist from './Playlist'
-import GhostlinesCanvas from './GhostlinesCanvas'
 
 export default function VideoPlayer() {
   const videoRef = useRef(null)
@@ -17,7 +16,6 @@ export default function VideoPlayer() {
   const [showControls, setShowControls] = useState(true)
   const [playlist, setPlaylist] = useState([])
   const [activeIndex, setActiveIndex] = useState(0)
-  const [ghostlines, setGhostlines] = useState(false)
   const controlsTimer = useRef(null)
   const containerRef = useRef(null)
 
@@ -159,13 +157,6 @@ export default function VideoPlayer() {
             />
           )}
 
-          {/* Ghostlines canvas layer */}
-          {videoSrc && ghostlines && (
-            <GhostlinesCanvas
-              currentTime={currentTime}
-              containerRef={containerRef}
-            />
-          )}
 
           {/* Center play/pause flash */}
           {videoSrc && (
@@ -202,8 +193,6 @@ export default function VideoPlayer() {
                 onFullscreen={toggleFullscreen}
                 onNext={playNext}
                 onPrev={playPrev}
-                ghostlines={ghostlines}
-                onToggleGhostlines={() => setGhostlines((g) => !g)}
                 hasNext={activeIndex < playlist.length - 1}
                 hasPrev={activeIndex > 0}
               />

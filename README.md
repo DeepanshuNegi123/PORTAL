@@ -1,6 +1,6 @@
 # 🌀 Vortex
 
-Vortex is a private, real-time peer-to-peer (P2P) collaboration and media sharing workspace for two users. It allows instant file transfer, synchronized video playback with a drawing overlay, and collaborative notes/clipboard syncing.
+Vortex is a private, real-time peer-to-peer (P2P) collaboration and media sharing workspace for two users. It allows instant file transfer, synchronized video playback, and collaborative notes/clipboard syncing.
 
 The project is structured as a monorepo consisting of a React-based frontend client (`vortex`) and a Node.js signaling server (`server`).
 
@@ -8,7 +8,6 @@ The project is structured as a monorepo consisting of a React-based frontend cli
 
 - **P2P File Transfer:** Direct browser-to-browser secure file transfer using WebRTC (via PeerJS).
 - **Synchronized Video Player:** Watch video files together with synchronized play, pause, seek controls, and a playlist manager.
-- **Ghostlines Canvas:** Draw directly on top of the video player in real time.
 - **Collaborative Notepad:** A shared text area that synchronizes keystrokes instantly between peers.
 - **Shared Clipboard:** Quickly exchange text snippets, links, or commands.
 - **Automatic Signaling & Room Management:** Rooms are limited to exactly 2 users, managed via Socket.io with room ownership/leader transfer logic.

@@ -2,65 +2,16 @@ import { useState, useRef } from 'react'
 import TransferProgress from './TransferProgress'
 import FileHistory from './FileHistory'
 
-export default function FileTransfer() {
+export default function FileTransfer({ isLeader, roomId, p2pConnected, transfers, history, sendFile }) {
   const inputRef = useRef(null)
   const [isDragging, setIsDragging] = useState(false)
-  const [transfers, setTransfers] = useState([])
-  const [history, setHistory] = useState([])
-
-  // Simulate a transfer for UI purposes
-  
-  const simulateTransfer = (files) => {
-    Array.from(files).forEach((file) => {
-      const id = Date.now() + Math.random()
-      const transfer = {
-        id,
-        name: file.name,
-        size: file.size,
-        type: file.type || 'unknown',
-        progress: 0,
-        speed: 0,
-        status: 'sending', // sending | done | error
-        direction: 'out',
-      }
-
-      setTransfers((prev) => [...prev, transfer])
-
-      // Simulate progress
-      let progress = 0
-      const interval = setInterval(() => {
-        progress += Math.random() * 8 + 2
-        const speed = Math.random() * 50 + 10
-        if (progress >= 100) {
-          progress = 100
-          clearInterval(interval)
-          setTransfers((prev) =>
-            prev.map((t) =>
-              t.id === id ? { ...t, progress: 100, status: 'done' } : t
-            )
-          )
-          setHistory((prev) => [
-            { ...transfer, progress: 100, status: 'done', time: new Date() },
-            ...prev,
-          ])
-          setTimeout(() => {
-            setTransfers((prev) => prev.filter((t) => t.id !== id))
-          }, 3000)
-        } else {
-          setTransfers((prev) =>
-            prev.map((t) =>
-              t.id === id ? { ...t, progress: Math.min(progress, 100), speed } : t
-            )
-          )
-        }
-      }, 200)
-    })
-  }
 
   const handleDrop = (e) => {
     e.preventDefault()
     setIsDragging(false)
-    if (e.dataTransfer.files.length > 0) simulateTransfer(e.dataTransfer.files)
+    if (e.dataTransfer.files.length > 0) {
+      Array.from(e.dataTransfer.files).forEach(sendFile)
+    }
   }
 
   const handleDragOver = (e) => {
@@ -99,7 +50,7 @@ export default function FileTransfer() {
               <span className="text-violet-400">⚡</span> Wormhole Transfer
             </h2>
             <p className="text-xs text-gray-600 mt-0.5">
-              Direct P2P · No size limit · End-to-end encrypted
+              {p2pConnected ? '🟢 Connected P2P' : '🔴 Connecting P2P'} · Direct · End-to-end encrypted
             </p>
           </div>
           <button
@@ -113,9 +64,11 @@ export default function FileTransfer() {
             type="file"
             multiple
             className="hidden"
-            onChange={(e) =>
-              e.target.files.length > 0 && simulateTransfer(e.target.files)
-            }
+            onChange={(e) => {
+              if (e.target.files.length > 0) {
+                Array.from(e.target.files).forEach(sendFile)
+              }
+            }}
           />
         </div>
       </div>

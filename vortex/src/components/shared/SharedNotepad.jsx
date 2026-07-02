@@ -1,4 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import socket from '../../lib/socket'
 
 const COLORS = [
   { id: 'default', bg: 'bg-[#0d0d14]', border: 'border-white/5', label: 'Dark' },
@@ -8,6 +10,7 @@ const COLORS = [
 ]
 
 export default function SharedNotepad() {
+  const { roomId } = useParams()
   const [text, setText] = useState('')
   const [theme, setTheme] = useState('default')
   const [fontSize, setFontSize] = useState('lg')
@@ -15,6 +18,16 @@ export default function SharedNotepad() {
   const [copied, setCopied] = useState(false)
   const [showMarkdown, setShowMarkdown] = useState(false)
   const textareaRef = useRef(null)
+
+  useEffect(() => {
+    const handleUpdate = ({ text: newText }) => {
+      setText(newText)
+    }
+    socket.on('notepad-update', handleUpdate)
+    return () => {
+      socket.off('notepad-update', handleUpdate)
+    }
+  }, [])
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0
   const charCount = text.length
@@ -30,6 +43,7 @@ export default function SharedNotepad() {
 
   const clearAll = () => {
     setText('')
+    socket.emit('notepad-update', { roomId, text: '' })
     textareaRef.current?.focus()
   }
 
@@ -42,6 +56,7 @@ export default function SharedNotepad() {
     const end = el.selectionEnd
     const newText = text.slice(0, start) + insertion + text.slice(end)
     setText(newText)
+    socket.emit('notepad-update', { roomId, text: newText })
     setTimeout(() => {
       el.selectionStart = start + insertion.length
       el.selectionEnd = start + insertion.length
@@ -202,7 +217,7 @@ export default function SharedNotepad() {
 
       {/* Sync indicator */}
       <div className={`px-6 py-1.5 border-b ${currentTheme.border} flex items-center gap-2 shrink-0 bg-white/[0.01]`}>
-        <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
+        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
         <span className="text-[10px] text-gray-600 uppercase tracking-widest">
           Live sync · changes visible to your friend in real time
         </span>
@@ -216,7 +231,11 @@ export default function SharedNotepad() {
           <textarea
             ref={textareaRef}
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setText(val);
+              socket.emit('notepad-update', { roomId, text: val });
+            }}
             placeholder={`Start typing...\n\nThis notepad is shared with your friend in real time.\nUse # for headings, - for lists, > for quotes.\n\nTip: Press the ⏱ button to insert a timestamp.`}
             className={`
               flex-1 w-full bg-inherit resize-none  text-gray-200

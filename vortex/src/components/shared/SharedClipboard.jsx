@@ -1,14 +1,39 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import socket from '../../lib/socket'
 
 const CATEGORIES = ['all', 'text', 'image', 'link', 'code']
 
 export default function SharedClipboard() {
+  const { roomId } = useParams()
   const [items, setItems] = useState([])
   const [input, setInput] = useState('')
   const [category, setCategory] = useState('all')
   const [copiedId, setCopiedId] = useState(null)
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    const handleAdd = ({ item }) => {
+      addItem(item.content, item.type, item.imageUrl, false, item)
+    }
+    const handleDelete = ({ itemId }) => {
+      deleteItem(itemId, false)
+    }
+    const handleClear = () => {
+      setItems([])
+    }
+
+    socket.on('clipboard-add', handleAdd)
+    socket.on('clipboard-delete', handleDelete)
+    socket.on('clipboard-clear', handleClear)
+
+    return () => {
+      socket.off('clipboard-add', handleAdd)
+      socket.off('clipboard-delete', handleDelete)
+      socket.off('clipboard-clear', handleClear)
+    }
+  }, [roomId])
 
   
 
@@ -20,8 +45,8 @@ export default function SharedClipboard() {
 
 
 
-  const addItem = (content, type = null, imageUrl = null) => {
-    const item = {
+  const addItem = (content, type = null, imageUrl = null, shouldEmit = true, remoteItem = null) => {
+    const item = remoteItem || {
       id: Date.now(),
       content,
       type: type || detectType(content),
@@ -30,8 +55,15 @@ export default function SharedClipboard() {
       pinned: false,
       from: 'you',
     }
+    if (remoteItem) {
+      item.time = new Date(remoteItem.time)
+      item.from = 'friend'
+    }
     setItems(prev => [item, ...prev])
     setInput('')
+    if (shouldEmit) {
+      socket.emit('clipboard-add', { roomId, item })
+    }
   }
 
   const handlePaste = (e) => {
@@ -73,7 +105,12 @@ export default function SharedClipboard() {
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  const deleteItem = (id) => setItems(prev => prev.filter(i => i.id !== id))
+  const deleteItem = (id, shouldEmit = true) => {
+    setItems(prev => prev.filter(i => i.id !== id))
+    if (shouldEmit) {
+      socket.emit('clipboard-delete', { roomId, itemId: id })
+    }
+  }
 
   const togglePin = (id) => {
     setItems(prev =>
@@ -187,7 +224,10 @@ export default function SharedClipboard() {
         ))}
         {items.length > 0 && (
           <button
-            onClick={() => setItems([])}
+            onClick={() => {
+              setItems([])
+              socket.emit('clipboard-clear', { roomId })
+            }}
             className="ml-auto text-xs text-red-900 hover:text-red-500 transition uppercase tracking-widest"
           >
             Clear all

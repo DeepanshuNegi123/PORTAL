@@ -16,6 +16,7 @@ export default function Sidebar({
   friendName,
   connected,
   onTransferLeader,
+  onRequestLeader,
 }) {
   return (
     <aside className="w-20 bg-[#0a0a0f] border-r border-white/5 flex flex-col items-center gap-[2rem]  shrink-0">
@@ -55,6 +56,7 @@ export default function Sidebar({
             isLeader={isLeader}
             friendName={friendName}
             onTransfer={onTransferLeader}
+            onRequest={onRequestLeader}
           />
         </>
       )}

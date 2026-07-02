@@ -18,6 +18,11 @@ function setupRooms(io) {
 
       const room = rooms.get(roomId);
 
+      // Prevent duplicate socket entries (e.g. from React 18 Strict Mode double mounts)
+      if (room.some(u => u.socketId === socket.id)) {
+        return;
+      }
+
       // Room full check
       if (room.length >= MAX_ROOM_SIZE) {
         socket.emit('room-full');
@@ -37,11 +42,13 @@ function setupRooms(io) {
 
       console.log(`[room] ${username} joined ${roomId} (leader: ${isLeader})`);
 
-      // Tell the joining socket their role
+      // Tell the joining socket their role and existing members
       if (isLeader) {
         socket.emit('you-are-leader');
       } else {
-        socket.emit('you-are-member');
+        socket.emit('you-are-member', {
+          members: room.filter(u => u.socketId !== socket.id)
+        });
       }
 
       // Tell everyone else in the room that a friend joined
@@ -117,4 +124,4 @@ function handleLeave(io, socket, roomId) {
   }
 }
 
-module.exports = { setupRooms, rooms };
+export { setupRooms, rooms };

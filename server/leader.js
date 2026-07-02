@@ -1,4 +1,4 @@
-import { rooms } from './room';
+import { rooms } from './src/room/room.js';
 
 function setupLeader(io) {
   io.on('connection', (socket) => {
@@ -66,4 +66,4 @@ function setupLeader(io) {
   });
 }
 
-export default { setupLeader };
+export { setupLeader };

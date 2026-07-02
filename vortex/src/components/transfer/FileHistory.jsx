@@ -32,11 +32,20 @@ export default function FileHistory({ history, formatBytes, getFileIcon }) {
               <span className={`text-[10px] uppercase tracking-widest ${
                 item.direction === 'out' ? 'text-violet-400' : 'text-cyan-400'
               }`}>
-                {item.direction === 'out' ? '↑' : '↓'}
+                {item.direction === 'out' ? 'Sent' : 'Recv'}
               </span>
               <span className="text-[10px] text-gray-700">
                 {item.time?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
+              {item.downloadUrl && (
+                <a
+                  href={item.downloadUrl}
+                  download={item.name}
+                  className="text-[10px] text-green-400 hover:underline uppercase tracking-wider mt-1"
+                >
+                  Save
+                </a>
+              )}
             </div>
           </div>
         ))}

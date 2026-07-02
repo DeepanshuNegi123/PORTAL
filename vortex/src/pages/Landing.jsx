@@ -22,7 +22,7 @@ export default function Landing() {
   const handleJoin = () => {
     if (!username.trim()) return setError('Enter your name first')
     if (!roomInput.trim()) return setError('Enter a room code')
-    // localStorage.setItem('vortex_user', username.trim())
+    localStorage.setItem('vortex_user', username.trim())
     navigate(`/base/${roomInput.trim().toUpperCase()}`)
   }
 

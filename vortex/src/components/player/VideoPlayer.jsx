@@ -2,9 +2,51 @@ import { useState, useRef, useEffect } from 'react'
 import PlayerControls from './PlayerControls'
 import FileDropZone from './FileDropZone'
 import Playlist from './Playlist'
+import socket from '../../lib/socket'
 
-export default function VideoPlayer() {
+export default function VideoPlayer({ isLeader, roomId }) {
   const videoRef = useRef(null)
+  const isRemoteAction = useRef(false)
+
+  useEffect(() => {
+    if (isLeader) return
+
+    const handlePlay = ({ time }) => {
+      if (!videoRef.current) return
+      isRemoteAction.current = true
+      videoRef.current.currentTime = time
+      videoRef.current.play().catch(() => {})
+      setPlaying(true)
+      setTimeout(() => { isRemoteAction.current = false }, 150)
+    }
+
+    const handlePause = ({ time }) => {
+      if (!videoRef.current) return
+      isRemoteAction.current = true
+      videoRef.current.currentTime = time
+      videoRef.current.pause()
+      setPlaying(false)
+      setTimeout(() => { isRemoteAction.current = false }, 150)
+    }
+
+    const handleSeek = ({ time }) => {
+      if (!videoRef.current) return
+      isRemoteAction.current = true
+      videoRef.current.currentTime = time
+      setCurrentTime(time)
+      setTimeout(() => { isRemoteAction.current = false }, 150)
+    }
+
+    socket.on('video-play', handlePlay)
+    socket.on('video-pause', handlePause)
+    socket.on('video-seek', handleSeek)
+
+    return () => {
+      socket.off('video-play', handlePlay)
+      socket.off('video-pause', handlePause)
+      socket.off('video-seek', handleSeek)
+    }
+  }, [isLeader, roomId])
   const [videoSrc, setVideoSrc] = useState(null)
   const [videoName, setVideoName] = useState('')
   const [playing, setPlaying] = useState(false)
@@ -69,20 +111,29 @@ export default function VideoPlayer() {
 
   // Controls
   const togglePlay = () => {
-    if (!videoRef.current) return
+    if (!videoRef.current || isRemoteAction.current) return
     if (playing) {
       videoRef.current.pause()
       setPlaying(false)
+      if (isLeader) {
+        socket.emit('video-pause', { roomId, time: videoRef.current.currentTime })
+      }
     } else {
       videoRef.current.play()
       setPlaying(true)
+      if (isLeader) {
+        socket.emit('video-play', { roomId, time: videoRef.current.currentTime })
+      }
     }
   }
 
   const handleSeek = (val) => {
-    if (!videoRef.current) return
+    if (!videoRef.current || isRemoteAction.current) return
     videoRef.current.currentTime = val
     setCurrentTime(val)
+    if (isLeader) {
+      socket.emit('video-seek', { roomId, time: val })
+    }
   }
 
   const handleVolume = (val) => {
@@ -100,11 +151,15 @@ export default function VideoPlayer() {
   }
 
   const skip = (secs) => {
-    if (!videoRef.current) return
-    videoRef.current.currentTime = Math.min(
+    if (!videoRef.current || isRemoteAction.current) return
+    const newTime = Math.min(
       Math.max(0, videoRef.current.currentTime + secs),
       duration
     )
+    videoRef.current.currentTime = newTime
+    if (isLeader) {
+      socket.emit('video-seek', { roomId, time: newTime })
+    }
   }
 
   const toggleFullscreen = () => {
